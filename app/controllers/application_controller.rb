@@ -385,7 +385,9 @@ class ApplicationController < ActionController::Base
         logger.warn "Missing post redirect token. " \
                     "Session: #{session.to_hash} " \
                     "IP: #{user_ip} " \
-                    "Params: #{params}"
+                    "Params: #{params} " \
+                    "Context: #{params[:context]}"
+        return redirect_to no_cookies_path(:context => params[:context])
       end
     end
   end
