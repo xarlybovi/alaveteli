@@ -139,45 +139,6 @@ class UserController < ApplicationController
     @ip_rate_limiter ||= AlaveteliRateLimiter::IPRateLimiter.new(:signup)
   end
 
-  def confirm
-    post_redirect = PostRedirect.find_by_email_token(params[:email_token])
-
-    if post_redirect.nil?
-      render :template => 'user/bad_token'
-      return
-    end
-
-    case post_redirect.circumstance
-    when 'login_as'
-      @user = confirm_user!(post_redirect.user)
-      session[:user_id] = @user.id
-    when 'change_password'
-      unless session[:user_id] == post_redirect.user_id
-        clear_session_credentials
-      end
-
-      session[:change_password_post_redirect_id] = post_redirect.id
-    when 'normal', 'change_email'
-      # !User.stay_logged_in_on_redirect?(nil)
-      # # => true
-      # !User.stay_logged_in_on_redirect?(user)
-      # # => true
-      # !User.stay_logged_in_on_redirect?(admin)
-      # # => false
-      if User.stay_logged_in_on_redirect?(@user)
-        session[:admin_confirmation] = 1
-      else
-        @user = confirm_user!(post_redirect.user)
-      end
-
-      session[:user_id] = @user.id
-    end
-
-    session[:user_circumstance] = post_redirect.circumstance
-
-    do_post_redirect post_redirect, @user
-  end
-
   # Change your email
   def signchangeemail
     # "authenticated?" has done the redirect to signin page for us
@@ -443,11 +404,6 @@ class UserController < ApplicationController
     end
   end
 
-  def set_request_from_foreign_country
-    @request_from_foreign_country =
-      country_from_ip != AlaveteliConfiguration.iso_country_code
-  end
-
   def normalize_url_name
     unless MySociety::Format.simplify_url_part(params[:url_name], 'user') == params[:url_name]
       redirect_to :url_name =>  MySociety::Format.simplify_url_part(params[:url_name], 'user'), :status => :moved_permanently
@@ -564,11 +520,6 @@ class UserController < ApplicationController
     @feed_autodetect = [ { :url => do_track_url(@track_thing, 'feed'), :title => @track_thing.params[:title_in_rss], :has_json => true } ]
   end
 
-  def confirm_user!(user)
-    user.confirm!
-    user
-  end
-
   def current_user_is_display_user
     @user.try(:id) == @display_user.id
   end
@@ -640,4 +591,10 @@ class UserController < ApplicationController
       false
     end
   end
+
+  def set_request_from_foreign_country
+    @request_from_foreign_country =
+      country_from_ip != AlaveteliConfiguration.iso_country_code
+  end
+
 end
