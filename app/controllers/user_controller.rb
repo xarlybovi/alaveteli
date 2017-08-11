@@ -90,9 +90,6 @@ class UserController < ApplicationController
 
   # Login form
   def signin
-    # First time page is shown
-    return render :action => 'sign' unless params[:user_signin]
-
     if @post_redirect.present?
       @user_signin =
         User.authenticate_from_form(user_signin_params,
@@ -468,6 +465,23 @@ class UserController < ApplicationController
 
   private
 
+  # Decide where we are going to redirect back to after signin/signup,
+  # and record that
+  def work_out_post_redirect
+    # Redirect to front page later if nothing else specified
+    params[:r] = "/" if params[:r].nil? && params[:token].nil?
+
+    # The explicit "signin" link uses this to specify where to go back to
+    if params[:r]
+      @post_redirect = generate_post_redirect_for_signup(params[:r])
+      @post_redirect.save!
+      params[:token] = @post_redirect.token
+    elsif params[:token]
+      # Otherwise we have a token (which represents a saved POST request)
+      @post_redirect = PostRedirect.find_by_token(params[:token])
+    end
+  end
+
   def set_request_from_foreign_country
     @request_from_foreign_country =
       country_from_ip != AlaveteliConfiguration.iso_country_code
@@ -510,22 +524,6 @@ class UserController < ApplicationController
   # when logging in through a modal iframe, don't display chrome around the content
   def select_layout
     is_modal_dialog ? 'no_chrome' : 'default'
-  end
-
-  # Decide where we are going to redirect back to after signin/signup, and record that
-  def work_out_post_redirect
-    # Redirect to front page later if nothing else specified
-    params[:r] = "/" if params[:r].nil? && params[:token].nil?
-
-    # The explicit "signin" link uses this to specify where to go back to
-    if params[:r]
-      @post_redirect = generate_post_redirect_for_signup(params[:r])
-      @post_redirect.save!
-      params[:token] = @post_redirect.token
-    elsif params[:token]
-      # Otherwise we have a token (which represents a saved POST request)
-      @post_redirect = PostRedirect.find_by_token(params[:token])
-    end
   end
 
   # Ask for email confirmation
