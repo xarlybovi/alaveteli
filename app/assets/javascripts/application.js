@@ -8,4 +8,5 @@
 //= require general
 //= require ba-throttle-debounce
 //= require jquery.deparam
+//= require correspondence-collapse
 //= require alaveteli_pro/alaveteli_pro

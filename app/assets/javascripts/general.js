@@ -141,4 +141,6 @@ $(document).ready(function() {
   $('.after-actions__action-menu').dropit({
     submenuEl: '.action-menu__menu'
   });
+
+  setUpCorrespondenceCollapsing();
 });
