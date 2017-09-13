@@ -1,6 +1,6 @@
 # -*- encoding : utf-8 -*-
 require 'spec_helper'
-require 'zip/zipfilesystem'
+require 'zip/filesystem'
 
 describe 'zipping pdf files' do
 
@@ -11,14 +11,14 @@ describe 'zipping pdf files' do
     tempfile = Tempfile.new('ziptest')
     tempfile.binmode
 
-    Zip::ZipFile.open(tempfile.path + '.zip', Zip::ZipFile::CREATE) do |zipfile|
+    Zip::File.open(tempfile.path + '.zip', Zip::File::CREATE) do |zipfile|
       zipfile.get_output_stream('tfl.pdf') do |f|
         f.puts pdf_file
       end
     end
 
     zipped_size = 0
-    Zip::ZipFile.open(tempfile.path + '.zip') do |zipfile|
+    Zip::File.open(tempfile.path + '.zip') do |zipfile|
       zipped_size = zipfile.file.size('tfl.pdf')
     end
     tempfile.close
