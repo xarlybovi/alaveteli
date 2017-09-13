@@ -69,4 +69,9 @@ var setUpCorrespondenceCollapsing = function(){
       }
     });
   });
+
+  $('.js-collapsable-trigger-all').on('click', function(e){
+    e.preventDefault();
+    $('.js-collapsable').trigger('collapse');
+  });
 };
