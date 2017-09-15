@@ -7,10 +7,13 @@ branches:
     - develop
     - alaveteli-pro-develop
 rvm:
-  - 1.9.3
-  - 2.0.0
-  - 2.1.5
-  - 2.3.0
+  - 1.9.3 # Debian Wheezy, Ubuntu Trusty
+  - 2.0.0 # Ubuntu Trusty
+  - 2.1.5 # Debian Jessie
+  - 2.3.0 # Ubuntu Xenial
+  - 2.3.1 # Ubuntu Xenial
+  - 2.3.3 # Debian Stretch
+  - 2.3.5 # Latest Official 2.3.x
 env:
   global:
     - S3_REGION=us-east-1
