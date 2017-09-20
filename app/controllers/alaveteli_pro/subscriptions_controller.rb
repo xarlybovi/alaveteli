@@ -79,6 +79,18 @@ class AlaveteliPro::SubscriptionsController < ApplicationController
     end
   end
 
+  def destroy
+    @customer = current_user.pro_account.try(:stripe_customer)
+    raise ActiveRecord::RecordNotFound unless @customer
+
+    @subscription = Stripe::Subscription.retrieve(params[:id])
+    @subscription.delete(at_end_of_period: true)
+    flash[:notice] = _('You have successfully cancelled your subscription ' \
+                       'to {{pro_site_name}}',
+                       pro_site_name: AlaveteliConfiguration.pro_site_name)
+    redirect_to profile_subscription_path
+  end
+
   private
 
   def authenticate

@@ -354,4 +354,80 @@ describe AlaveteliPro::SubscriptionsController do
 
   end
 
+  describe 'DELETE #destroy' do
+
+    context 'without a signed-in user' do
+
+      before do
+        delete :destroy, id: '123'
+      end
+
+      it 'redirects to the login form' do
+        expect(response).
+          to redirect_to(signin_path(:token => PostRedirect.last.token))
+      end
+
+    end
+
+    context 'user has no Stripe id' do
+
+      let(:user) { FactoryGirl.create(:user) }
+
+      before do
+        session[:user_id] = user.id
+      end
+
+      it 'raise an error' do
+        expect { delete :destroy, id: '123' }.
+          to raise_error ActiveRecord::RecordNotFound
+      end
+
+    end
+
+    context 'with a signed-in user' do
+
+      let(:user) { FactoryGirl.create(:pro_user) }
+
+      let(:plan) { stripe_helper.create_plan(id: 'test') }
+
+      let(:customer) do
+        customer = Stripe::Customer.create({
+          email: user.email,
+          source: stripe_helper.generate_card_token,
+        })
+        user.pro_account.update!(stripe_customer_id: customer.id)
+        customer
+      end
+
+      let(:subscription) do
+        Stripe::Subscription.create(customer: customer, plan: plan.id)
+      end
+
+      before do
+        session[:user_id] = user.id
+        delete :destroy, id: subscription.id
+      end
+
+      it 'finds the subscription in Stripe' do
+        expect(assigns[:subscription].id).to eq(subscription.id)
+      end
+
+      it 'marks the subscription as cancelled' do
+        expect(assigns[:subscription].status).to eq('canceled')
+      end
+
+      it 'informs the user that they have cancelled' do
+        msg = 'You have successfully cancelled your subscription to ' \
+              'Alaveteli Professional'
+        expect(flash[:notice]).to eq(msg)
+      end
+
+      it 'redirects to the subscriptions page' do
+        expect(response).to redirect_to(profile_subscription_path)
+      end
+
+    end
+
+  end
+
 end
