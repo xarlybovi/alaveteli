@@ -412,8 +412,8 @@ describe AlaveteliPro::SubscriptionsController do
         expect(assigns[:subscription].id).to eq(subscription.id)
       end
 
-      it 'marks the subscription as cancelled' do
-        expect(assigns[:subscription].status).to eq('canceled')
+      it 'cancels the subscription at the end of the billing period' do
+        expect(assigns[:subscription].cancel_at_period_end).to eq(true)
       end
 
       it 'informs the user that they have cancelled' do
