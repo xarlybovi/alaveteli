@@ -85,6 +85,11 @@ class AlaveteliPro::SubscriptionsController < ApplicationController
       raise ActiveRecord::RecordNotFound unless @customer
 
       @subscription = Stripe::Subscription.retrieve(params[:id])
+
+      unless @subscription.customer == @customer.id
+        raise ActiveRecord::RecordNotFound
+      end
+
       @subscription.delete(at_end_of_period: true)
     rescue Stripe::RateLimitError,
            Stripe::InvalidRequestError,

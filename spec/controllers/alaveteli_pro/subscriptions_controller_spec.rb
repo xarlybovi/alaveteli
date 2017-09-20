@@ -426,6 +426,23 @@ describe AlaveteliPro::SubscriptionsController do
         expect(response).to redirect_to(profile_subscription_path)
       end
 
+      context 'when destroying a subscription belonging to another user' do
+
+        let(:other_subscription) do
+          customer = Stripe::Customer.create({
+            email: 'test@example.org',
+            source: stripe_helper.generate_card_token,
+          })
+          Stripe::Subscription.create(customer: customer, plan: plan.id)
+        end
+
+        it 'raises an error' do
+          session[:user_id] = user.id
+          expect { delete :destroy, id: other_subscription.id }.
+            to raise_error ActiveRecord::RecordNotFound
+        end
+      end
+
       context 'when we are rate limited' do
 
         before do
