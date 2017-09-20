@@ -426,6 +426,130 @@ describe AlaveteliPro::SubscriptionsController do
         expect(response).to redirect_to(profile_subscription_path)
       end
 
+      context 'when we are rate limited' do
+
+        before do
+          error = Stripe::RateLimitError.new
+          StripeMock.prepare_error(error, :cancel_subscription)
+          delete :destroy, id: subscription.id
+        end
+
+        it 'sends an exception email' do
+          mail = ActionMailer::Base.deliveries.first
+          expect(mail.subject).to match(/Stripe::RateLimitError/)
+        end
+
+        it 'renders an error message' do
+          expect(flash[:error]).to match(/There was a problem/)
+        end
+
+        it 'redirects to the subscriptions page' do
+          expect(response).to redirect_to(profile_subscription_path)
+        end
+
+      end
+
+      context 'when Stripe receives an invalid request' do
+
+        before do
+          error = Stripe::InvalidRequestError.new('message', 'param')
+          StripeMock.prepare_error(error, :cancel_subscription)
+          delete :destroy, id: subscription.id
+        end
+
+        it 'sends an exception email' do
+          mail = ActionMailer::Base.deliveries.first
+          expect(mail.subject).to match(/Stripe::InvalidRequestError/)
+        end
+
+        it 'renders an error message' do
+          expect(flash[:error]).to match(/There was a problem/)
+        end
+
+        it 'redirects to the subscriptions page' do
+          expect(response).to redirect_to(profile_subscription_path)
+        end
+
+      end
+
+      context 'when we cannot authenticate with Stripe' do
+
+        before do
+          error = Stripe::AuthenticationError.new
+          StripeMock.prepare_error(error, :cancel_subscription)
+          delete :destroy, id: subscription.id
+        end
+
+        it 'sends an exception email' do
+          mail = ActionMailer::Base.deliveries.first
+          expect(mail.subject).to match(/Stripe::AuthenticationError/)
+        end
+
+        it 'renders an error message' do
+          expect(flash[:error]).to match(/There was a problem/)
+        end
+
+        it 'redirects to the subscriptions page' do
+          expect(response).to redirect_to(profile_subscription_path)
+        end
+
+      end
+
+      context 'when we cannot connect to Stripe' do
+
+        before do
+          error = Stripe::APIConnectionError.new
+          StripeMock.prepare_error(error, :cancel_subscription)
+          delete :destroy, id: subscription.id
+        end
+
+        it 'sends an exception email' do
+          mail = ActionMailer::Base.deliveries.first
+          expect(mail.subject).to match(/Stripe::APIConnectionError/)
+        end
+
+        it 'renders an error message' do
+          expect(flash[:error]).to match(/There was a problem/)
+        end
+
+        it 'redirects to the subscriptions page' do
+          expect(response).to redirect_to(profile_subscription_path)
+        end
+
+      end
+
+      context 'when Stripe returns a generic error' do
+
+        before do
+          error = Stripe::StripeError.new
+          StripeMock.prepare_error(error, :cancel_subscription)
+          delete :destroy, id: subscription.id
+        end
+
+        it 'sends an exception email' do
+          mail = ActionMailer::Base.deliveries.first
+          expect(mail.subject).to match(/Stripe::StripeError/)
+        end
+
+        it 'renders an error message' do
+          expect(flash[:error]).to match(/There was a problem/)
+        end
+
+        it 'redirects to the subscriptions page' do
+          expect(response).to redirect_to(profile_subscription_path)
+        end
+
+      end
+
+      context 'when invalid params are submitted' do
+
+        it 'redirects to the plan page if there is a plan' do
+          delete :destroy, :id => 'unknown'
+          expect(response).to redirect_to(profile_subscription_path)
+        end
+
+      end
+
     end
 
   end
