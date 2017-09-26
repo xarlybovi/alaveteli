@@ -89,7 +89,7 @@ class AlaveteliPro::SubscriptionsController < AlaveteliPro::BaseController
   def authenticate
     post_redirect_params = {
       :web => _('To upgrade your account'),
-      :email => _('To upgrade your account'),
+      :email => _('Then you can upgrade your account'),
       :email_subject => _('To upgrade your account') }
     authenticated?(post_redirect_params)
   end
