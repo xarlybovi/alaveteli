@@ -1,7 +1,6 @@
 # -*- encoding : utf-8 -*-
 class AlaveteliPro::PlansController < AlaveteliPro::BaseController
   skip_before_action :pro_user_authenticated?
-  skip_before_action :set_in_pro_area, only: [:index]
   before_filter :authenticate, :check_existing_subscription, only: [:show]
 
   def index
