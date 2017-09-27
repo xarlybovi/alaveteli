@@ -1158,3 +1158,13 @@ STRIPE_PUBLISHABLE_KEY: ''
 #
 # ---
 STRIPE_SECRET_KEY: ''
+
+# Stripe.com webhook secret. Only required for Alaveteli Pro.
+#
+# STRIPE_WEBHOOK_SECRET: - String (default: '')
+#
+# Examples:
+#
+# STRIPE_WEBHOOK_SECRET: wh_test_UD6BDsARFZIYb8273dbdl
+# ---
+STRIPE_WEBHOOK_SECRET: ''
